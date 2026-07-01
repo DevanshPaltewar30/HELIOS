@@ -206,7 +206,7 @@ const SimulationSidebar: React.FC<SimulationSidebarProps> = ({
           </span>
         </div>
         <div className="text-[8px] font-mono text-space-muted mt-0.5">
-          Backend: localhost:3001
+          Backend: {import.meta.env.DEV ? 'localhost:3001' : 'Integrated API (Production)'}
         </div>
       </div>
     </aside>

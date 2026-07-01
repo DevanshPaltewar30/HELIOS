@@ -60,7 +60,7 @@ const App: React.FC = () => {
       setStatusMsg(`Step ${step + 1}/${TOTAL_STEPS} · ${data.history[data.history.length - 1]?.cmePhase ?? ''}`);
       setLoading(false);
     } catch {
-      setStatusMsg('Backend unreachable — check localhost:3001');
+      setStatusMsg('Backend unreachable — check API connection');
       setLoading(false);
     }
   }, []);
@@ -69,7 +69,7 @@ const App: React.FC = () => {
   useEffect(() => {
     checkBackendHealth().then(online => {
       setBackendOnline(online);
-      if (!online) setStatusMsg('⚠ Backend offline · Start with: npm run dev in /backend');
+      if (!online) setStatusMsg('⚠ Backend offline / unreachable');
     });
   }, []);
 

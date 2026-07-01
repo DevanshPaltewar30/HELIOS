@@ -1,22 +1,56 @@
 // ============================================================
-// API Service Layer - Axios-based typed API calls
+// API Service Layer - Mock Frontend-Only API
 // ============================================================
 
-import axios from 'axios';
 import type {
   TelemetryStreamResponse,
   LongitudeAlignmentEntry,
   CDFUploadResult
 } from '../types/helios.types';
 
-// In dev, Vite proxies to localhost:3001. In production, frontend is served from the same server.
-const BASE = import.meta.env.DEV ? 'http://localhost:3001/api' : '/api';
+import {
+  generateCMETimeSeries,
+  generateForecastSteps,
+  generateQuantileBundle,
+  generateVSNWeights,
+  generateEvaluationMetrics,
+  buildAlerts
+} from './mockEngine';
 
-const api = axios.create({ baseURL: BASE, timeout: 10000 });
+const CME_SERIES = generateCMETimeSeries();
 
 export async function fetchTelemetryStream(step: number): Promise<TelemetryStreamResponse> {
-  const { data } = await api.get<TelemetryStreamResponse>(`/telemetry/stream?step=${step}`);
-  return data;
+  // Simulate network delay
+  await new Promise(r => setTimeout(r, 100));
+
+  const validStep = Math.max(0, Math.min(step, CME_SERIES.length - 1));
+  const currentPoint = CME_SERIES[validStep];
+
+  const historyWindow = CME_SERIES.slice(Math.max(0, validStep - 29), validStep + 1);
+  const forecastSteps = generateForecastSteps(currentPoint, CME_SERIES);
+  const quantileBundle = generateQuantileBundle(currentPoint, CME_SERIES);
+  const vsnWeights = generateVSNWeights(currentPoint);
+  const systemAlerts = buildAlerts(
+    currentPoint.electronFluxLog10,
+    currentPoint.bzGSM,
+    currentPoint.solarWindVelocity,
+    currentPoint.dynamicPressure
+  );
+  const evaluationMetrics = generateEvaluationMetrics(currentPoint);
+
+  return {
+    currentStep: validStep,
+    totalSteps: CME_SERIES.length,
+    history: historyWindow,
+    forecast: {
+      steps: forecastSteps,
+      horizonLabels: forecastSteps.map(f => f.horizonLabel)
+    },
+    quantileBundle,
+    vsnWeights,
+    systemAlerts,
+    evaluationMetrics
+  };
 }
 
 export async function fetchFullSeriesMetadata(): Promise<{
@@ -26,8 +60,18 @@ export async function fetchFullSeriesMetadata(): Promise<{
   cadenceMinutes: number;
   phases: Array<{ name: string; startStep: number; endStep: number }>;
 }> {
-  const { data } = await api.get('/telemetry/full');
-  return data;
+  return {
+    totalSteps: CME_SERIES.length,
+    epochStart: CME_SERIES[0].isoTimestamp,
+    epochEnd: CME_SERIES[CME_SERIES.length - 1].isoTimestamp,
+    cadenceMinutes: 5,
+    phases: [
+      { name: 'AMBIENT', startStep: 0, endStep: 29 },
+      { name: 'SHEATH', startStep: 30, endStep: 44 },
+      { name: 'EJECTA', startStep: 45, endStep: 79 },
+      { name: 'RECOVERY', startStep: 80, endStep: 119 },
+    ]
+  };
 }
 
 export async function fetchLongitudeMatrix(): Promise<{
@@ -36,24 +80,30 @@ export async function fetchLongitudeMatrix(): Promise<{
   generatedAt: string;
   method: string;
 }> {
-  const { data } = await api.get('/data/longitude-matrix');
-  return data;
+  return {
+    matrix: [],
+    referenceBaseline: 'Earth-L1',
+    generatedAt: new Date().toISOString(),
+    method: 'MOCK_STATIC'
+  };
 }
 
 export async function uploadCDFFile(file: File): Promise<CDFUploadResult> {
-  const form = new FormData();
-  form.append('cdfFile', file);
-  const { data } = await api.post<CDFUploadResult>('/data/upload', form, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
-  return data;
+  return {
+    uploadId: "mock-" + Math.random(),
+    filename: file.name,
+    fileSizeBytes: file.size,
+    processingSteps: [],
+    detectedVariables: [],
+    epochStart: new Date().toISOString(),
+    epochEnd: new Date().toISOString(),
+    totalRecords: 120,
+    missingEpochs: 0,
+    coordinateSystem: "GSM",
+    status: 'SUCCESS'
+  };
 }
 
 export async function checkBackendHealth(): Promise<boolean> {
-  try {
-    await api.get('/health');
-    return true;
-  } catch {
-    return false;
-  }
+  return true;
 }
