@@ -9,7 +9,9 @@ import type {
   CDFUploadResult
 } from '../types/helios.types';
 
-const BASE = 'http://localhost:3001/api';
+// In production (Vercel), frontend and backend share the same domain.
+// Use a relative URL so /api requests go to the Vercel serverless function.
+const BASE = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 const api = axios.create({ baseURL: BASE, timeout: 10000 });
 
