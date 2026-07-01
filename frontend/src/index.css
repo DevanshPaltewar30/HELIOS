@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --color-bg: 249 250 251;
+  --color-surface: 255 255 255;
+  --color-panel: 243 244 246;
+  --color-border: 0 0 0;
+  --color-muted: 107 114 128;
+  --color-text: 17 24 39;
+  --color-cyan: 2 132 199;
+  --color-green: 21 128 61;
+  --color-yellow: 180 83 9;
+  --color-red: 185 28 28;
+  --color-orange: 194 65 12;
+  --color-purple: 126 34 206;
+  --color-blue: 29 78 216;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-bg: 2 4 10;
+  --color-surface: 13 17 23;
+  --color-panel: 28 35 51;
+  --color-border: 255 255 255;
+  --color-muted: 139 148 158;
+  --color-text: 230 237 243;
+  --color-cyan: 88 200 227;
+  --color-green: 63 185 80;
+  --color-yellow: 210 153 34;
+  --color-red: 248 81 73;
+  --color-orange: 232 124 46;
+  --color-purple: 163 113 247;
+  --color-blue: 56 139 253;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(var(--color-bg));
+  color: rgb(var(--color-text));
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Deep Space Star Background */
+.space-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: radial-gradient(circle at 15% 50%, rgba(88, 200, 227, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 85% 30%, rgba(163, 113, 247, 0.05) 0%, transparent 50%),
+              rgb(var(--color-bg));
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 200%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, rgb(var(--color-text)), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 40px 70px, rgb(var(--color-text)), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 50px 160px, rgb(var(--color-purple)), rgba(0,0,0,0)),
+    radial-gradient(1.5px 1.5px at 90px 40px, rgb(var(--color-text)), rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 130px 80px, rgb(var(--color-cyan)), rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 160px 120px, rgb(var(--color-text)), rgba(0,0,0,0));
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  animation: stars-animation 150s linear infinite;
+  opacity: 0.15;
+}
+.dark .stars { opacity: 0.4; }
+
+@keyframes stars-animation {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(var(--color-border), 0.1);
+}
+.dark .glass-panel {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgb(var(--color-bg)); }
+::-webkit-scrollbar-thumb { background: rgb(var(--color-border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--color-cyan)); }
+
+/* Scanline overlay for "mission control" feel */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* KPI card glow variants */
+.kpi-border-critical {
+  border-color: #F85149;
+  box-shadow: 0 0 12px rgba(248, 81, 73, 0.35), inset 0 0 12px rgba(248, 81, 73, 0.05);
+}
+.kpi-border-warning {
+  border-color: #D29922;
+  box-shadow: 0 0 12px rgba(210, 153, 34, 0.35), inset 0 0 12px rgba(210, 153, 34, 0.05);
+}
+.kpi-border-nominal {
+  border-color: #3FB950;
+  box-shadow: 0 0 12px rgba(63, 185, 80, 0.35), inset 0 0 12px rgba(63, 185, 80, 0.05);
+}
+.kpi-border-cyan {
+  border-color: #58C8E3;
+  box-shadow: 0 0 12px rgba(88, 200, 227, 0.3);
+}
+
+/* Tab button active state */
+.tab-active {
+  color: rgb(var(--color-cyan));
+  border-bottom: 2px solid rgb(var(--color-cyan));
+  background: linear-gradient(to bottom, rgba(88,200,227,0.08), transparent);
+}
+
+/* Recharts custom tooltip */
+.recharts-tooltip-wrapper .custom-tooltip {
+  background: rgba(var(--color-surface), 0.95);
+  border: 1px solid rgba(var(--color-border), 0.5);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgb(var(--color-text));
+}
+
+/* Alert pulse animation */
+@keyframes alert-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.alert-critical { animation: alert-pulse 1.5s ease-in-out infinite; }
+
+/* Data table row hover */
+.vsn-row:hover { background: rgba(88, 200, 227, 0.05); }
+
+/* Fan chart area gradient */
+.fan-area-fill { opacity: 0.25; }
+
+/* Sidebar step control */
+.step-btn {
+  transition: all 0.15s ease;
+}
+.step-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(88, 200, 227, 0.4);
+}
+.step-btn:active { transform: scale(0.97); }
