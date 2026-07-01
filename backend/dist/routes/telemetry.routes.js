@@ -102,6 +102,7 @@ router.get('/stream', (req, res) => {
     const quantileBundle = (0, cmeSimulation_1.generateQuantileBundle)(currentPoint, CME_SERIES);
     const vsnWeights = (0, cmeSimulation_1.generateVSNWeights)(currentPoint);
     const systemAlerts = buildAlerts(currentPoint.electronFluxLog10, currentPoint.bzGSM, currentPoint.solarWindVelocity, currentPoint.dynamicPressure);
+    const evaluationMetrics = (0, cmeSimulation_1.generateEvaluationMetrics)(currentPoint);
     const response = {
         currentStep: step,
         totalSteps: CME_SERIES.length,
@@ -112,7 +113,8 @@ router.get('/stream', (req, res) => {
         },
         quantileBundle,
         vsnWeights,
-        systemAlerts
+        systemAlerts,
+        evaluationMetrics
     };
     res.json(response);
 });

@@ -4,4 +4,5 @@ export declare function generateQuantileBundle(point: TelemetryPoint, series: Te
 export declare function generateForecastSteps(currentPoint: TelemetryPoint, series: TelemetryPoint[], currentIndex: number): ForecastStep[];
 export declare function generateGateWeights(point: TelemetryPoint): ModelGateWeights;
 export declare function generateVSNWeights(point: TelemetryPoint): VSNWeightTable;
+export declare function generateEvaluationMetrics(point: TelemetryPoint): import('../types/helios.types').EvaluationMetrics;
 //# sourceMappingURL=cmeSimulation.d.ts.map

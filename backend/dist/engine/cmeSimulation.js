@@ -9,6 +9,7 @@ exports.generateQuantileBundle = generateQuantileBundle;
 exports.generateForecastSteps = generateForecastSteps;
 exports.generateGateWeights = generateGateWeights;
 exports.generateVSNWeights = generateVSNWeights;
+exports.generateEvaluationMetrics = generateEvaluationMetrics;
 const TOTAL_STEPS = 120;
 const THRESHOLD = 3.8; // log10 deep-dielectric charging danger
 // ---------- Smooth interpolation helpers ----------
@@ -270,6 +271,39 @@ function generateVSNWeights(point) {
         encoderWeights: encoder,
         decoderWeights: decoder,
         timestamp: new Date().toISOString()
+    };
+}
+// ---------- Evaluation Metrics ----------
+function generateEvaluationMetrics(point) {
+    const noise = (Math.random() - 0.5) * 0.05;
+    const isStorm = point.electronFluxLog10 > 3.8;
+    const pe = Math.min(0.95, Math.max(0.70, 0.88 + noise));
+    const rmseLog = Math.max(0.1, 0.22 + noise * 0.5);
+    const hits = isStorm ? 42 + Math.floor(noise * 10) : 12;
+    const misses = isStorm ? 3 : 5;
+    const falseAlarms = 8;
+    const correctNegatives = isStorm ? 80 : 120;
+    const h = hits, m = misses, f = falseAlarms, c = correctNegatives;
+    const tss = (h / (h + m)) - (f / (f + c));
+    const hss = (2 * (h * c - m * f)) / ((h + m) * (m + c) + (h + f) * (f + c));
+    const pod = h / (h + m);
+    const far = f / (h + f);
+    const linexLoss = 0.45 + noise;
+    const pinballLoss = 0.18 + noise * 0.2;
+    const crps = 0.12 + noise * 0.1;
+    const epsilonTau = 4.2 + noise * 10;
+    return {
+        pe: parseFloat(pe.toFixed(3)),
+        rmseLog: parseFloat(rmseLog.toFixed(3)),
+        tss: parseFloat(tss.toFixed(3)),
+        hss: parseFloat(hss.toFixed(3)),
+        pod: parseFloat(pod.toFixed(3)),
+        far: parseFloat(far.toFixed(3)),
+        linexLoss: parseFloat(linexLoss.toFixed(3)),
+        pinballLoss: parseFloat(pinballLoss.toFixed(3)),
+        crps: parseFloat(crps.toFixed(3)),
+        epsilonTau: parseFloat(epsilonTau.toFixed(1)),
+        confusionMatrix: { hits, misses, falseAlarms, correctNegatives }
     };
 }
 //# sourceMappingURL=cmeSimulation.js.map

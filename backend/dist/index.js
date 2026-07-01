@@ -8,11 +8,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const path_1 = __importDefault(require("path"));
 const telemetry_routes_1 = __importDefault(require("./routes/telemetry.routes"));
 const data_routes_1 = __importDefault(require("./routes/data.routes"));
 const app = (0, express_1.default)();
 const PORT = process.env.PORT ?? 3001;
-app.use((0, cors_1.default)({ origin: ['http://localhost:5173', 'http://localhost:3000'], credentials: true }));
+app.use((0, cors_1.default)({ origin: '*', credentials: true }));
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true }));
 // Health check
@@ -27,9 +28,12 @@ app.get('/api/health', (_req, res) => {
 // Mount routers
 app.use('/api/telemetry', telemetry_routes_1.default);
 app.use('/api/data', data_routes_1.default);
-// 404 handler
-app.use((_req, res) => {
-    res.status(404).json({ error: 'Endpoint not found. Check /api/health for available routes.' });
+// Serve frontend static build
+const frontendDist = path_1.default.join(__dirname, '..', '..', 'frontend', 'dist');
+app.use(express_1.default.static(frontendDist));
+// Client-side routing fallback – serve index.html for any non-API route
+app.get('*', (_req, res) => {
+    res.sendFile(path_1.default.join(frontendDist, 'index.html'));
 });
 app.listen(PORT, () => {
     console.log(`\n🛰️  HELIOS Backend running on http://localhost:${PORT}`);

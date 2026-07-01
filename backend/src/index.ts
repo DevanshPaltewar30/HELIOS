@@ -4,13 +4,14 @@
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import telemetryRouter from './routes/telemetry.routes';
 import dataRouter from './routes/data.routes';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
-app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'], credentials: true }));
+app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,9 +29,13 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/telemetry', telemetryRouter);
 app.use('/api/data', dataRouter);
 
-// 404 handler
-app.use((_req, res) => {
-  res.status(404).json({ error: 'Endpoint not found. Check /api/health for available routes.' });
+// Serve frontend static build
+const frontendDist = path.join(__dirname, '..', '..', 'frontend', 'dist');
+app.use(express.static(frontendDist));
+
+// Client-side routing fallback – serve index.html for any non-API route
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
 app.listen(PORT, () => {

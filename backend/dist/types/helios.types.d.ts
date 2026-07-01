@@ -30,6 +30,24 @@ export interface ModelGateWeights {
     liquidNeuralNet: number;
     sslPretrainedBase: number;
 }
+export interface EvaluationMetrics {
+    pe: number;
+    rmseLog: number;
+    tss: number;
+    hss: number;
+    pod: number;
+    far: number;
+    linexLoss: number;
+    pinballLoss: number;
+    crps: number;
+    epsilonTau: number;
+    confusionMatrix: {
+        hits: number;
+        misses: number;
+        falseAlarms: number;
+        correctNegatives: number;
+    };
+}
 export interface TelemetryStreamResponse {
     currentStep: number;
     totalSteps: number;
@@ -38,6 +56,7 @@ export interface TelemetryStreamResponse {
     quantileBundle: QuantileBundle;
     vsnWeights: VSNWeightTable;
     systemAlerts: SystemAlert[];
+    evaluationMetrics: EvaluationMetrics;
 }
 export interface ForecastWindow {
     steps: ForecastStep[];
